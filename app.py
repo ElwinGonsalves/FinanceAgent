@@ -15,10 +15,13 @@ load_dotenv(override=True)
 # Load environment variables (Streamlit Cloud)
 # Streamlit Cloud stores secrets in st.secrets, not always os.environ.
 # We manually inject them to ensure tools usage of os.getenv works.
-if "GROQ_API_KEY" in st.secrets:
-    os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
-if "EXCHANGERATE_API_KEY" in st.secrets:
-    os.environ["EXCHANGERATE_API_KEY"] = st.secrets["EXCHANGERATE_API_KEY"]
+try:
+    if "GROQ_API_KEY" in st.secrets:
+        os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
+    if "EXCHANGERATE_API_KEY" in st.secrets:
+        os.environ["EXCHANGERATE_API_KEY"] = st.secrets["EXCHANGERATE_API_KEY"]
+except (FileNotFoundError, Exception):
+    pass # Expected locally when secrets.toml doesn't exist
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -120,13 +123,16 @@ with st.sidebar:
         st.write(f"EXCHANGERATE_API_KEY: {er_status}")
         
         # Check raw st.secrets for debugging cloud
-        if "EXCHANGERATE_API_KEY" in st.secrets:
-            st.write("Secret exists in st.secrets")
-            # Show first 4 chars to verify it's not empty/wrong
-            key_preview = st.secrets["EXCHANGERATE_API_KEY"][:4] + "..."
-            st.code(f"Key Preview: {key_preview}")
-        else:
-            st.write("Secret NOT found in st.secrets")
+        try:
+            if "EXCHANGERATE_API_KEY" in st.secrets:
+                st.write("Secret exists in st.secrets")
+                # Show first 4 chars to verify it's not empty/wrong
+                key_preview = st.secrets["EXCHANGERATE_API_KEY"][:4] + "..."
+                st.code(f"Key Preview: {key_preview}")
+            else:
+                st.write("Secret NOT found in st.secrets")
+        except Exception:
+            st.write("Secrets file not found (Running locally)")
 
 # --- Main Logic ---
 
@@ -200,6 +206,9 @@ if run_btn and target_country:
             
             st.subheader(f"💱 Currency: {currency_name} ({currency_code})")
             st.markdown(f":{source_color}[Source: {data_source}]")
+            
+            if "api_error" in data:
+                st.warning(f"⚠️ Live API failed: {data['api_error']}")
             
             cols = st.columns(4)
             rates = data.get('exchange_rates', {})

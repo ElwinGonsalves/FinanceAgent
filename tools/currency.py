@@ -46,6 +46,8 @@ def get_exchange_rates(country_name: str):
                     "rates": cross_rates,
                     "source": "Live API"
                 })
+            else:
+                api_error = f"API returned '{data.get('result')}': {data.get('error-type', 'Unknown error')}"
         except Exception as e:
             print(f"API Error: {e}")
             # Capture the error to return it
