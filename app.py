@@ -9,8 +9,16 @@ try:
 except ImportError:
     from finance_agent.agent import initialize_agent
 
-# Load environment variables
+# Load environment variables (Local)
 load_dotenv(override=True)
+
+# Load environment variables (Streamlit Cloud)
+# Streamlit Cloud stores secrets in st.secrets, not always os.environ.
+# We manually inject them to ensure tools usage of os.getenv works.
+if "GROQ_API_KEY" in st.secrets:
+    os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
+if "EXCHANGERATE_API_KEY" in st.secrets:
+    os.environ["EXCHANGERATE_API_KEY"] = st.secrets["EXCHANGERATE_API_KEY"]
 
 # --- Page Configuration ---
 st.set_page_config(
