@@ -10,6 +10,17 @@ def get_exchange_rates(country_name: str):
     """
     country_name = country_name.lower().strip()
     
+    # 0. Canonical Aliases (City/Synonym -> Country Code/Key)
+    aliases = {
+        "london": "uk", "great britain": "uk", "england": "uk", "britain": "uk",
+        "united kingdom": "uk",
+        "nyc": "usa", "new york": "usa", "united states": "usa", "us": "usa", "america": "usa",
+        "tokyo": "japan", "delhi": "india", "mumbai": "india", "bangalore": "india",
+        "beijing": "china", "shanghai": "china", "seoul": "south korea",
+        "paris": "france", "berlin": "germany", "rome": "italy", "madrid": "spain"
+    }
+    country_name = aliases.get(country_name, country_name)
+    
     # 1. Map Country to Currency Code
     country_currency_map = {
         "japan": "JPY", "india": "INR", "us": "USD", "usa": "USD", "united states": "USD",
