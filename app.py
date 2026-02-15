@@ -110,6 +110,23 @@ with st.sidebar:
             st.code(res, language="json")
         except Exception as e:
             st.error(f"Tool Error: {e}")
+            
+    if st.button("Check Secrets"):
+        st.write("Checking environment variables...")
+        groq_status = "✅ Found" if os.environ.get("GROQ_API_KEY") else "❌ Missing"
+        er_status = "✅ Found" if os.environ.get("EXCHANGERATE_API_KEY") else "❌ Missing"
+        
+        st.write(f"GROQ_API_KEY: {groq_status}")
+        st.write(f"EXCHANGERATE_API_KEY: {er_status}")
+        
+        # Check raw st.secrets for debugging cloud
+        if "EXCHANGERATE_API_KEY" in st.secrets:
+            st.write("Secret exists in st.secrets")
+            # Show first 4 chars to verify it's not empty/wrong
+            key_preview = st.secrets["EXCHANGERATE_API_KEY"][:4] + "..."
+            st.code(f"Key Preview: {key_preview}")
+        else:
+            st.write("Secret NOT found in st.secrets")
 
 # --- Main Logic ---
 

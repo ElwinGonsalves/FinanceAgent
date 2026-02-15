@@ -48,9 +48,13 @@ def get_exchange_rates(country_name: str):
                 })
         except Exception as e:
             print(f"API Error: {e}")
-            # Fallthrough to mock data
+            # Capture the error to return it
+            api_error = str(e)
             
     # 3. Mock Data Fallback
+    # Added core Eurozone for fallback coverage
+    eur_rates = {"USD": 1.08, "INR": 90.50, "GBP": 0.85, "EUR": 1.0}
+    
     data = {
         "japan": {
             "currency": "JPY",
@@ -87,10 +91,19 @@ def get_exchange_rates(country_name: str):
         "united kingdom": {
             "currency": "GBP",
             "rates": {"USD": 1.26, "INR": 105.4, "GBP": 1.0, "EUR": 1.17}
-        }
+        },
+        "germany": {"currency": "EUR", "rates": eur_rates},
+        "france": {"currency": "EUR", "rates": eur_rates},
+        "italy": {"currency": "EUR", "rates": eur_rates},
+        "spain": {"currency": "EUR", "rates": eur_rates}
     }
     
     if country_name in data:
-        return json.dumps(data[country_name])
+        result = data[country_name]
+        result["source"] = "Mock Data"
+        result["debug_info"] = "API failed or key missing"
+        if 'api_error' in locals():
+             result["api_error"] = api_error
+        return json.dumps(result)
     else:
-        return json.dumps({"error": "Country not found in database."})
+        return json.dumps({"error": f"Country '{country_name}' not found in database.", "api_status": "failed"})
